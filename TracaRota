@@ -4,13 +4,13 @@ from folium.features import Element
 
 # Caminhos dos arquivos
 arquivos = [
-    "C:\\Users\\joaomota\\Downloads\\dadosLocalizaçãoRoquePinheiro.xlsx",
-    "C:\\Users\\joaomota\\Downloads\\dadosLocalizaçãoFRANCISCOGILDEON.xlsx",
-    "C:\\Users\\joaomota\\Downloads\\dadosJoseRegivano.xlsx"
+    "C:\\Users\\joaomota\\Downloads\\dadosLocalização1.xlsx",
+    "C:\\Users\\joaomota\\Downloads\\dadosLocalização2.xlsx",
+    "C:\\Users\\joaomota\\Downloads\\dadosLocalização3.xlsx"
 ]
 
 # Nomes para a legenda (correspondentes à ordem das planilhas)
-nomes_legenda = ["Roque Pinheiro", "Francisco Gildeon", "Jose Regivano"]
+nomes_legenda = ["nome1", "nome2", "nome3"]
 
 # Cores para cada linha
 cores = ["blue", "red", "green"]
