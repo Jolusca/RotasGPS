@@ -1,0 +1,21 @@
+import pandas as pd
+
+# Carregar o arquivo Excel
+arquivo = "C:\\Users\\joaomota\\Downloads\\dadosLocalizaçãoJOSÉREGIVANO.xlsx"
+df = pd.read_excel(arquivo)
+
+
+# Verificar se a coluna "X" existe
+if "X" in df.columns:
+    # Dividir os valores da coluna "X" pela vírgula e expandir para duas colunas
+    df[["X", "Y"]] = df["X"].astype(str).str.split(",", expand=True)
+    
+    # Converter para números
+    df["X"] = pd.to_numeric(df["X"], errors="coerce")
+    df["Y"] = pd.to_numeric(df["Y"], errors="coerce")
+    
+    # Salvar o arquivo atualizado
+    df.to_excel(arquivo, index=False)
+    print("Arquivo atualizado com sucesso!")
+else:
+    print("Coluna 'X' não encontrada. Verifique o nome correto.")

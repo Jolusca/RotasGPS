@@ -1,0 +1,81 @@
+import pandas as pd
+import folium
+from folium.features import Element
+
+# Caminhos dos arquivos
+arquivos = [
+    "C:\\Users\\joaomota\\Downloads\\dadosLocalizaçãoRoquePinheiro.xlsx",
+    "C:\\Users\\joaomota\\Downloads\\dadosLocalizaçãoFRANCISCOGILDEON.xlsx",
+    "C:\\Users\\joaomota\\Downloads\\dadosJoseRegivano.xlsx"
+]
+
+# Nomes para a legenda (correspondentes à ordem das planilhas)
+nomes_legenda = ["Roque Pinheiro", "Francisco Gildeon", "Jose Regivano"]
+
+# Cores para cada linha
+cores = ["blue", "red", "green"]
+
+# Criar o mapa (centrado na primeira coordenada válida da primeira planilha)
+mapa = None
+
+for i, arquivo in enumerate(arquivos):
+    # Carregar o arquivo Excel
+    df = pd.read_excel(arquivo)
+
+    # Substituir diferentes variações de "ND" por NaN
+    df.replace(["ND", "N/D", "n/d", "nd", "NaN"], pd.NA, inplace=True)
+
+    # Remover linhas com valores ausentes
+    df.dropna(subset=["latitude", "longitude", "timestamp"], inplace=True)
+
+    # Converter para numérico (evita erros com strings inesperadas)
+    df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce")
+    df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
+
+    # Converter timestamp para string (caso esteja em formato numérico ou datetime)
+    df["timestamp"] = df["timestamp"].astype(str)
+
+    # Verificar se há dados válidos
+    if df.empty:
+        print(f"Aviso: Nenhum dado válido encontrado na planilha {arquivo}.")
+        continue
+
+    # Definir o centro do mapa na primeira coordenada válida da primeira planilha
+    if mapa is None:
+        mapa = folium.Map(location=[df["latitude"].iloc[0], df["longitude"].iloc[0]], zoom_start=15)
+
+    # Adicionar marcadores com timestamps
+    for lat, lon, time in zip(df["latitude"], df["longitude"], df["timestamp"]):
+        folium.Marker(
+            location=[lat, lon], 
+            popup=f"Timestamp: {time}",
+            icon=folium.Icon(color=cores[i], icon="info-sign")
+        ).add_to(mapa)
+
+    # Adicionar linha conectando os pontos
+    coordenadas = list(zip(df["latitude"], df["longitude"]))
+    folium.PolyLine(coordenadas, color=cores[i], weight=2.5, opacity=1).add_to(mapa)
+
+# Verificar se o mapa foi criado
+if mapa is None:
+    raise ValueError("Nenhum dado válido encontrado em nenhuma das planilhas.")
+
+# Adicionar legenda ao mapa
+legenda_html = """
+<div style="position: fixed; 
+            bottom: 50px; left: 50px; width: 200px; height: 100px; 
+            border:2px solid grey; z-index:9999; font-size:14px;
+            background-color:white; padding: 10px;">
+    <b>Legenda:</b> <br>
+    <i class="fa fa-circle" style="color:blue"></i> {} <br>
+    <i class="fa fa-circle" style="color:red"></i> {} <br>
+    <i class="fa fa-circle" style="color:green"></i> {} <br>
+</div>
+""".format(*nomes_legenda)
+
+mapa.get_root().html.add_child(Element(legenda_html))
+
+# Salvar o mapa
+saida_arquivo = "C:\\Users\\joaomota\\Downloads\\mapa_com_timestamps_e_legenda.html"
+mapa.save(saida_arquivo)
+print(f"Mapa gerado: abra '{saida_arquivo}' no navegador.")
